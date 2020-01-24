@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <plugins>
+    <plugin>
+      <name>iv-branch-maven-plugin Maven Mojo</name>
+      <prefix>iv-branch</prefix>
+      <artifactId>iv-branch-maven-plugin</artifactId>
+    </plugin>
+  </plugins>
+</metadata>
