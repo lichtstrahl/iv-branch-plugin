@@ -8,6 +8,6 @@ public class Main {
         String branch = version.getBranchName();
         System.out.println("\""+branch+"\"");
 
-        version.findApplicationYml();
+        version.getMavenProperty("java.version");
     }
 }

@@ -18,6 +18,9 @@ public class Help extends AbstractMojo {
                 .info("\t")
                 .info("\tversion")
                 .info("\t\tAppend into application.yml new property.")
+                .info("\t\tNeed parameter from configuration <versionPropertyName>")
+                .info("\tcheck")
+                .info("\t\tShow current value from <versionPropertyName>")
                 .info("");
     }
 
