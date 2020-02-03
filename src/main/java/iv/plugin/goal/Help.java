@@ -12,6 +12,7 @@ public class Help extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         this
+                .info("Version: " + "2.2")
                 .info("Goals:")
                 .info("\thello - print \"welcome\" message.")
                 .info("\t\tNeed parameter from configuration <name>")

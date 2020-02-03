@@ -8,21 +8,22 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 // Данная цель запускается при сборке (по умолчанию)
 @Data
 @Mojo(name = "version")
-public class Version extends AbstractMojo {
+public class Version extends BaseGoal {
     public static final String JAVA_VERSION = "java.version";
-    public static final String DEFAULT_VERSION_PROPERTY = "iv.version";
 
     @Parameter(defaultValue = "${project}")
     private MavenProject mavenProject;
     @Parameter(name = "versionPropertyName", defaultValue = DEFAULT_VERSION_PROPERTY, required = false)
     private String versionPropertyName;
+    @Parameter(name = "exportFilename", defaultValue = DEFAULT_EXPORT_FILENAME, required = false)
+    private String exportFilename;
+    @Parameter(name = "rewriteFile", defaultValue = "false")
+    private boolean rewriteFile;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -36,9 +37,37 @@ public class Version extends AbstractMojo {
         System.out.println("Project: " + projectVersion);
         String newProjectVersion = setMavenProperty(versionPropertyName, projectVersion.concat("-").concat(branch));
         System.out.println("Project: " + newProjectVersion);
+        export();
     }
 
+    public void export() {
+        if (exportFilename.equals(DEFAULT_EXPORT_FILENAME))
+            getLog().warn("Default export exportFilename: " + DEFAULT_EXPORT_FILENAME);
 
+
+        File exportFile = new File(exportFilename);
+        if (exportFile.exists() && !rewriteFile) {
+            getLog().error("File exists and <rewriteFile> is false");
+            return;
+        }
+        exportFile.delete();
+
+        try {
+            boolean create = exportFile.createNewFile();
+
+            if (!create) {
+                getLog().error("Can't create file " + exportFilename);
+                return;
+            }
+
+            FileWriter writer = new FileWriter(exportFile);
+            // Получаем текущее значение версии из pom.xml ипишем в файл
+            writer.write(mavenProject.getProperties().getProperty(versionPropertyName));
+            writer.close();
+        } catch (IOException e) {
+            getLog().error(e.getMessage());
+        }
+    }
 
     public String getBranchName() {
         ProcessBuilder builder = new ProcessBuilder();
