@@ -9,21 +9,28 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 // Данная цель запускается при сборке (по умолчанию)
 @Data
 @Mojo(name = "version")
 public class Version extends BaseGoal {
     public static final String JAVA_VERSION = "java.version";
+    private static final String SEPARATOR = ",";
 
     @Parameter(defaultValue = "${project}")
     private MavenProject mavenProject;
-    @Parameter(name = "versionPropertyName", defaultValue = DEFAULT_VERSION_PROPERTY, required = false)
+    @Parameter(name = "versionPropertyName", defaultValue = DEFAULT_VERSION_PROPERTY)
     private String versionPropertyName;
-    @Parameter(name = "exportFilename", defaultValue = DEFAULT_EXPORT_FILENAME, required = false)
+    @Parameter(name = "exportFilename", defaultValue = DEFAULT_EXPORT_FILENAME)
     private String exportFilename;
     @Parameter(name = "rewriteFile", defaultValue = "false")
     private boolean rewriteFile;
+    @Parameter(name = "ignoreBranch", defaultValue = "")
+    private String ignoreBranch;
+
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -31,14 +38,26 @@ public class Version extends BaseGoal {
             getLog().warn("versionPropertyName not set in configuration. Default: iv.version");
         }
 
+        List<String> ignoreBranchNames = Arrays.stream(ignoreBranch.split(SEPARATOR))
+                .map(String::trim)
+                .collect(Collectors.toList());
+
         String branch = getBranchName();
         System.out.println("Branch name: " + branch);
+        boolean ignore = ignoreBranchNames.contains(branch);
+        if (ignore)
+            getLog().warn("This branch ignored (from configuration)");
+
         String projectVersion = getMavenProperty(versionPropertyName);
         System.out.println("Project: " + projectVersion);
-        String newProjectVersion = setMavenProperty(versionPropertyName, projectVersion.concat("-").concat(branch));
+        String version = ignore
+            ? projectVersion
+            : projectVersion.concat("-").concat(branch);
+        String newProjectVersion = setMavenProperty(versionPropertyName, version);
         System.out.println("Project: " + newProjectVersion);
         export();
     }
+
 
     public void export() {
         if (exportFilename.equals(DEFAULT_EXPORT_FILENAME))

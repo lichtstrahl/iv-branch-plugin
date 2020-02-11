@@ -12,14 +12,16 @@ public class Help extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         this
-                .info("Version: " + "2.2")
+                .info("Version: " + "2.3")
                 .info("Goals:")
                 .info("\thello - print \"welcome\" message.")
                 .info("\t\tNeed parameter from configuration <name>")
                 .info("\t")
                 .info("\tversion")
-                .info("\t\tAppend into application.yml new property.")
+                .info("\t\tAppend into application.yml new property and write to export-file")
                 .info("\t\tNeed parameter from configuration <versionPropertyName>")
+                .info("\t\tNeed parameter from configuration <exportFilename>")
+                .info("\t\tNeed parameter from configuration <rewriteFile>")
                 .info("\tcheck")
                 .info("\t\tShow current value from <versionPropertyName>")
                 .info("");
