@@ -1,14 +1,15 @@
 package iv.plugin.goal;
 
 import lombok.Data;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,10 +25,8 @@ public class Version extends BaseGoal {
     private MavenProject mavenProject;
     @Parameter(name = "versionPropertyName", defaultValue = DEFAULT_VERSION_PROPERTY)
     private String versionPropertyName;
-    @Parameter(name = "exportFilename", defaultValue = DEFAULT_EXPORT_FILENAME)
-    private String exportFilename;
-    @Parameter(name = "rewriteFile", defaultValue = "false")
-    private boolean rewriteFile;
+
+
     @Parameter(name = "ignoreBranch", defaultValue = "")
     private String ignoreBranch;
 
@@ -55,38 +54,9 @@ public class Version extends BaseGoal {
             : projectVersion.concat("-").concat(branch);
         String newProjectVersion = setMavenProperty(versionPropertyName, version);
         System.out.println("Project: " + newProjectVersion);
-        export();
     }
 
 
-    public void export() {
-        if (exportFilename.equals(DEFAULT_EXPORT_FILENAME))
-            getLog().warn("Default export exportFilename: " + DEFAULT_EXPORT_FILENAME);
-
-
-        File exportFile = new File(exportFilename);
-        if (exportFile.exists() && !rewriteFile) {
-            getLog().error("File exists and <rewriteFile> is false");
-            return;
-        }
-        exportFile.delete();
-
-        try {
-            boolean create = exportFile.createNewFile();
-
-            if (!create) {
-                getLog().error("Can't create file " + exportFilename);
-                return;
-            }
-
-            FileWriter writer = new FileWriter(exportFile);
-            // Получаем текущее значение версии из pom.xml ипишем в файл
-            writer.write(mavenProject.getProperties().getProperty(versionPropertyName));
-            writer.close();
-        } catch (IOException e) {
-            getLog().error(e.getMessage());
-        }
-    }
 
     public String getBranchName() {
         ProcessBuilder builder = new ProcessBuilder();
@@ -134,12 +104,5 @@ public class Version extends BaseGoal {
         return mavenProject
                 .getProperties()
                 .getProperty(propertyName);
-    }
-
-    private boolean isValidProperty(String name) {
-        return mavenProject
-                .getProperties()
-                .stringPropertyNames()
-                .contains(name);
     }
 }
